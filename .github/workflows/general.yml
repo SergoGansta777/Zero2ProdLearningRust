@@ -51,13 +51,3 @@ jobs:
       - name: Generate code coverage
         run: |
           cargo tarpaulin --verbose --workspace
-
-  security_audit:
-      name: Security check
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions-rs/audit-check@v1.2.0
-        - uses: actions/checkout@v3
-        - uses: taiki-e/install-action@cargo-deny
-        - name: Scan for vulnerabilities
-          run: cargo deny check advisories

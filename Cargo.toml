@@ -15,5 +15,17 @@ actix-web = "4.4.1"
 serde = { version = "1.0.196", features = ["derive"] }
 tokio = { version = "1.35.1", features = ["rt-multi-thread", "macros"] }
 
+[dependencies.sqlx]
+version = "0.5.7"
+default-features = false
+features = [
+    "runtime-actix-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate"
+]
+
 [dev-dependencies]
 reqwest = "0.11"

@@ -2870,7 +2870,6 @@ dependencies = [
  "actix-web",
  "chrono",
  "config",
- "log",
  "reqwest",
  "serde 1.0.196",
  "sqlx",

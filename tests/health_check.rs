@@ -131,7 +131,7 @@ async fn sibscribe_returns_a_200_when_fields_are_present_but_empty() {
 
         // Assert
         assert_eq!(
-            200,
+            400,
             response.status().as_u16(),
             "The API did not return a 200 OK when the payload was {}.",
             description

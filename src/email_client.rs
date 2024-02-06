@@ -17,7 +17,7 @@ impl EmailClient {
     ) -> Self {
         Self {
             http_client: Client::new(),
-            base_url: reqwest::Url::parse(base_url).expect("Error while parsing url"),
+            base_url: reqwest::Url::parse(base_url).expect("Error while parsing url ->"),
             sender,
             authorization_token,
         }
@@ -28,7 +28,7 @@ impl EmailClient {
         subject: &str,
         html_content: &str,
         text_content: &str,
-    ) -> Result<(), String> {
+    ) -> Result<(), reqwest::Error> {
         let url = self
             .base_url
             .join("/email")
@@ -47,7 +47,9 @@ impl EmailClient {
                 "X-Postmark-Server-Token",
                 self.authorization_token.expose_secret(),
             )
-            .json(&request_body);
+            .json(&request_body)
+            .send()
+            .await?;
         Ok(())
     }
 }
@@ -88,6 +90,8 @@ mod tests {
         let subject: String = Sentence(1..2).fake();
         let content: String = Paragraph(1..10).fake();
 
-        let _ = email_client.send_email(subscriber_email, &subject, &content, &content);
+        let _ = email_client
+            .send_email(subscriber_email, &subject, &content, &content)
+            .await;
     }
 }

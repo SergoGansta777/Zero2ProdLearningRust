@@ -53,8 +53,10 @@ version = "1.6.1"
 features = ["serde", "v4"]
 
 [dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros"]}
 rand = "0.8.5"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
 fake = "2.9.2"
 claims = "0.7"
+wiremock = "0.5.22"

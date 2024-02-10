@@ -40,7 +40,7 @@ async fn subscibe_persists_the_new_subscriber() {
 }
 
 #[tokio::test]
-async fn sibscribe_returns_a_200_when_fields_are_present_but_empty() {
+async fn sibscribe_returns_a_400_when_fields_are_present_but_empty() {
     // Arrange
     let app = spawn_app().await;
     let test_cases = vec![
@@ -57,7 +57,7 @@ async fn sibscribe_returns_a_200_when_fields_are_present_but_empty() {
         assert_eq!(
             400,
             response.status().as_u16(),
-            "The API did not return a 200 OK when the payload was {}.",
+            "The API did not return a 400 when the payload was {}.",
             description
         )
     }

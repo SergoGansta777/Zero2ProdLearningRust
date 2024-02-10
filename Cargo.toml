@@ -53,6 +53,7 @@ version = "1.6.1"
 features = ["serde", "v4"]
 
 [dev-dependencies]
+linkify = "0.10.0"
 tokio = { version = "1", features = ["rt", "macros"] }
 rand = "0.8.5"
 quickcheck = "1.0.3"

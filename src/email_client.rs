@@ -78,6 +78,7 @@ mod tests {
     use fake::faker::lorem::en::{Paragraph, Sentence};
     use fake::{Fake, Faker};
     use secrecy::Secret;
+    use tokio::test;
     use wiremock::matchers::{any, header, header_exists, method, path};
     use wiremock::Request;
     use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -120,7 +121,7 @@ mod tests {
         )
     }
 
-    #[tokio::test]
+    #[test]
     async fn send_email_fires_a_request_to_base_url() {
         let mock_server = MockServer::start().await;
         let email_client = email_client(mock_server.uri().as_str());
@@ -140,7 +141,7 @@ mod tests {
             .await;
     }
 
-    #[tokio::test]
+    #[test]
     async fn send_email_succeeds_if_the_server_returns_200() {
         let mock_server = MockServer::start().await;
         let email_client = email_client(&mock_server.uri());
@@ -158,7 +159,7 @@ mod tests {
         assert_ok!(outcome);
     }
 
-    #[tokio::test]
+    #[test]
     async fn send_email_fails_if_the_server_returns_500() {
         let mock_server = MockServer::start().await;
         let email_client = email_client(&mock_server.uri());
@@ -176,7 +177,7 @@ mod tests {
         assert_err!(outcome);
     }
 
-    #[tokio::test]
+    #[test]
     async fn send_email_times_out_if_the_server_takes_too_long() {
         let mock_server = MockServer::start().await;
         let email_client = email_client(&mock_server.uri());

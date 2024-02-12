@@ -1,8 +1,9 @@
 use crate::helpers::spawn_app;
+use tokio::test;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
 
-#[tokio::test]
+#[test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
     let app = spawn_app().await;
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
@@ -17,7 +18,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
     assert_eq!(200, response.status().as_u16());
 }
 
-#[tokio::test]
+#[test]
 async fn subscibe_persists_the_new_subscriber() {
     let app = spawn_app().await;
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
@@ -39,7 +40,7 @@ async fn subscibe_persists_the_new_subscriber() {
     assert_eq!(saved.status, "pending_confirmation")
 }
 
-#[tokio::test]
+#[test]
 async fn sibscribe_returns_a_400_when_fields_are_present_but_empty() {
     // Arrange
     let app = spawn_app().await;
@@ -63,7 +64,7 @@ async fn sibscribe_returns_a_400_when_fields_are_present_but_empty() {
     }
 }
 
-#[tokio::test]
+#[test]
 async fn subscribe_returns_a_400_when_data_is_missing() {
     let app = spawn_app().await;
 
@@ -85,7 +86,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     }
 }
 
-#[tokio::test]
+#[test]
 async fn subscirber_send_a_confirmation_email_for_valid_data() {
     let app = spawn_app().await;
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
@@ -100,7 +101,7 @@ async fn subscirber_send_a_confirmation_email_for_valid_data() {
     app.post_subscriptions(body.into()).await;
 }
 
-#[tokio::test]
+#[test]
 async fn subscriber_sends_a_confirmation_emal_with_a_link() {
     let app = spawn_app().await;
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";

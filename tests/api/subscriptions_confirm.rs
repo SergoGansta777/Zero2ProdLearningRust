@@ -1,8 +1,9 @@
 use crate::helpers::spawn_app;
+use tokio::test;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
 
-#[tokio::test]
+#[test]
 async fn the_link_returned_by_subscribe_returns_a_200_if_called() {
     let app = spawn_app().await;
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
@@ -22,7 +23,7 @@ async fn the_link_returned_by_subscribe_returns_a_200_if_called() {
     assert_eq!(response.status().as_u16(), 200);
 }
 
-#[tokio::test]
+#[test]
 async fn confirmations_without_token_are_rejected_with_a_400() {
     let app = spawn_app().await;
 
@@ -33,7 +34,7 @@ async fn confirmations_without_token_are_rejected_with_a_400() {
     assert_eq!(response.status().as_u16(), 400);
 }
 
-#[tokio::test]
+#[test]
 async fn clicking_on_the_confirmation_link_confirms_a_subcriber() {
     let app = spawn_app().await;
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";

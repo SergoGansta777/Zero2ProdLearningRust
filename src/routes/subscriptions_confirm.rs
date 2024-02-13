@@ -1,6 +1,10 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, ResponseError};
+use anyhow::Context;
+use reqwest::StatusCode;
 use sqlx::PgPool;
 use uuid::Uuid;
+
+use super::error_chain_fmt;
 
 #[derive(serde::Deserialize)]
 pub struct Parameters {
@@ -8,20 +12,18 @@ pub struct Parameters {
 }
 
 #[tracing::instrument(name = "Confirm a pending subscriber", skip(parameters, pool))]
-pub async fn confirm(parameters: web::Query<Parameters>, pool: web::Data<PgPool>) -> HttpResponse {
-    let id = match get_subscriber_id_from_token(&pool, &parameters.subscription_token).await {
-        Ok(id) => id,
-        Err(_) => return HttpResponse::InternalServerError().finish(),
-    };
-    match id {
-        None => HttpResponse::Unauthorized().finish(),
-        Some(subscriber_id) => {
-            if confirm_subscriber(&pool, subscriber_id).await.is_err() {
-                return HttpResponse::InternalServerError().finish();
-            }
-            HttpResponse::Ok().finish()
-        }
-    }
+pub async fn confirm(
+    parameters: web::Query<Parameters>,
+    pool: web::Data<PgPool>,
+) -> Result<HttpResponse, ConfirmationError> {
+    let subscriber_id = get_subscriber_id_from_token(&pool, &parameters.subscription_token)
+        .await
+        .context("Failed to retrieve the subscriber id associated with the provided token.")?
+        .ok_or(ConfirmationError::UnknownToken)?;
+    confirm_subscriber(&pool, subscriber_id)
+        .await
+        .context("Failed to update the subscriber status to `confirmed`.")?;
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[tracing::instrument(name = "Mark subscriber as confirmed", skip(subscriber_id, pool))]
@@ -56,4 +58,27 @@ pub async fn get_subscriber_id_from_token(
         e
     })?;
     Ok(Some(result.subscriber_id))
+}
+
+#[derive(thiserror::Error)]
+pub enum ConfirmationError {
+    #[error(transparent)]
+    UnexpectedError(#[from] anyhow::Error),
+    #[error("There is no subscriber associated with the provided token.")]
+    UnknownToken,
+}
+
+impl std::fmt::Debug for ConfirmationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        error_chain_fmt(self, f)
+    }
+}
+
+impl ResponseError for ConfirmationError {
+    fn status_code(&self) -> StatusCode {
+        match self {
+            Self::UnknownToken => StatusCode::UNAUTHORIZED,
+            Self::UnexpectedError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
 }

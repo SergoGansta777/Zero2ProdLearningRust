@@ -95,11 +95,11 @@ pub async fn send_confirmation_email(
         base_url, subscription_token
     );
     let html_body = format!(
-        "Welcome to out newsletter?\nVisit {} to confirm your subscription.",
+        "Welcome to our newsletter!\nVisit {} to confirm your subscription.",
         confirmation_link
     );
     let plain_body = format!(
-        "Welcome to out newsletter!<br />\
+        "Welcome to our newsletter!<br />\
         Click <a href=\"{}\">here</ a> to confirm your subscription.",
         confirmation_link
     );

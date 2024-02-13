@@ -25,7 +25,6 @@ pub async fn confirm(
         .context("Failed to update the subscriber status to `confirmed`.")?;
     Ok(HttpResponse::Ok().finish())
 }
-
 #[tracing::instrument(name = "Mark subscriber as confirmed", skip(subscriber_id, pool))]
 pub async fn confirm_subscriber(pool: &PgPool, subscriber_id: Uuid) -> Result<(), sqlx::Error> {
     sqlx::query!(

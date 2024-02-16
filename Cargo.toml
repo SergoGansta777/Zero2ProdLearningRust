@@ -33,6 +33,7 @@ rand = { version = "0.8.5", features = ["std_rng"] }
 thiserror = "1.0.57"
 anyhow = "1.0.79"
 base64 = "0.21.7"
+argon2 = { version = "0.5.3", features = ["std"] }
 
 
 [dependencies.reqwest]

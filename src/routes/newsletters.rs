@@ -176,7 +176,7 @@ fn basic_authenication(headers: &HeaderMap) -> Result<Credentials, anyhow::Error
     let decoded_credentials = String::from_utf8(decoded_bytes)
         .context("The decoded credential string is not valid UTF8.")?;
 
-    let mut credentials = decoded_credentials.splitn(2, ":");
+    let mut credentials = decoded_credentials.splitn(2, ':');
     let username = credentials
         .next()
         .ok_or_else(|| anyhow::anyhow!("A username must be provided in 'Basic' auth."))?
@@ -206,7 +206,7 @@ async fn validate_credentials(
     );
 
     if let Some((stored_user_id, stored_password_hash)) =
-        get_stored_credentials(&credentials.username, &pool)
+        get_stored_credentials(&credentials.username, pool)
             .await
             .map_err(PublishError::UnexpectedError)?
     {

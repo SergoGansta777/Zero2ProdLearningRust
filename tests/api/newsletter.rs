@@ -1,5 +1,4 @@
 use crate::helpers::{spawn_app, ConfirmationLinks, TestApp};
-use fake::faker::internet::raw::Username;
 use tokio::test;
 use uuid::Uuid;
 use wiremock::matchers::{any, method, path};

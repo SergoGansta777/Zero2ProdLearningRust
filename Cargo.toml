@@ -39,6 +39,7 @@ htmlescape = "0.3.1"
 hmac = { version = "0.12.1", features = ["std"] }
 sha2 = "0.10.8"
 hex = "0.4.3"
+actix-web-flash-messages = { version = "0.4.2", features = ["cookies"] }
 
 
 [dependencies.reqwest]

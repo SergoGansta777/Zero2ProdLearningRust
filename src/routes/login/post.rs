@@ -1,22 +1,26 @@
-use crate::authentication::{validate_credentials, AuthError, Credentials};
+use crate::authentication::AuthError;
+use crate::authentication::{validate_credentials, Credentials};
 use crate::routes::error_chain_fmt;
 use crate::session_state::TypedSession;
 use actix_web::error::InternalError;
 use actix_web::http::header::LOCATION;
+use actix_web::web;
 use actix_web::HttpResponse;
-use actix_web::{web, ResponseError};
 use actix_web_flash_messages::FlashMessage;
-use reqwest::StatusCode;
 use secrecy::Secret;
 use sqlx::PgPool;
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
     username: String,
-    passwrod: Secret<String>,
+    password: Secret<String>,
 }
 
-#[tracing::instrument(skip(form, pool, session), fields(username=tracing::field::Empty, user_id=tracing::field::Empty))]
+#[tracing::instrument(
+    skip(form, pool, session),
+    fields(username=tracing::field::Empty, user_id=tracing::field::Empty)
+)]
+// We are now injecting `PgPool` to retrieve stored credentials from the database
 pub async fn login(
     form: web::Form<FormData>,
     pool: web::Data<PgPool>,
@@ -24,7 +28,7 @@ pub async fn login(
 ) -> Result<HttpResponse, InternalError<LoginError>> {
     let credentials = Credentials {
         username: form.0.username,
-        password: form.0.passwrod,
+        password: form.0.password,
     };
     tracing::Span::current().record("username", &tracing::field::display(&credentials.username));
     match validate_credentials(credentials, &pool).await {
@@ -48,7 +52,6 @@ pub async fn login(
     }
 }
 
-// Redirect to the login page with an error message.
 fn login_redirect(e: LoginError) -> InternalError<LoginError> {
     FlashMessage::error(e.to_string()).send();
     let response = HttpResponse::SeeOther()
@@ -68,20 +71,5 @@ pub enum LoginError {
 impl std::fmt::Debug for LoginError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         error_chain_fmt(self, f)
-    }
-}
-
-impl ResponseError for LoginError {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code())
-            .insert_header((LOCATION, format!("/login")))
-            .finish()
-    }
-
-    fn status_code(&self) -> StatusCode {
-        match self {
-            LoginError::UnexpectedError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            LoginError::AuthError(_) => StatusCode::UNAUTHORIZED,
-        }
     }
 }

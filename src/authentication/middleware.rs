@@ -1,14 +1,29 @@
+use crate::session_state::TypedSession;
 use crate::utils::{e500, see_other};
 use actix_web::body::MessageBody;
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::error::InternalError;
-use actix_web::FromRequest;
-use actix_web::HttpMessage;
+use actix_web::{FromRequest, HttpMessage};
 use actix_web_lab::middleware::Next;
 use std::ops::Deref;
 use uuid::Uuid;
 
-use crate::session_state::TypedSession;
+#[derive(Copy, Clone, Debug)]
+pub struct UserId(Uuid);
+
+impl std::fmt::Display for UserId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl Deref for UserId {
+    type Target = Uuid;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 pub async fn reject_anonymous_users(
     mut req: ServiceRequest,
@@ -29,21 +44,5 @@ pub async fn reject_anonymous_users(
             let e = anyhow::anyhow!("The user has not logged in");
             Err(InternalError::from_response(e, response).into())
         }
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-pub struct UserId(Uuid);
-
-impl std::fmt::Display for UserId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
-impl Deref for UserId {
-    type Target = Uuid;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }

@@ -135,6 +135,7 @@ async fn newsletter_creation_is_idempotent() {
         .expect(1)
         .mount(&app.email_server)
         .await;
+
     // Act - Part 1 - Submit newsletter form
     let newsletter_request_body = serde_json::json!({ "title": "Newsletter title",
 "text_content": "Newsletter body as plain text", "html_content": "<p>Newsletter body as HTML</p>", // We expect the idempotency key as part of the // form data, not as an header

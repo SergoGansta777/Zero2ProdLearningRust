@@ -54,7 +54,7 @@ pub async fn get_saved_response(
 }
 
 pub async fn save_response(
-    pool: &PgPool,
+    mut transaction: Transaction<'static, Postgres>,
     idempotency_key: &IdempotencyKey,
     user_id: Uuid,
     http_response: HttpResponse,
@@ -71,27 +71,26 @@ pub async fn save_response(
         }
         h
     };
-
-    sqlx::query_unchecked!(
-        r#"
-        INSERT INTO idempotency (
-        user_id,
-        idempotency_key,
-        response_status_code,
-        response_headers,
-        response_body,
-        created_at
-        )
-        VALUES ($1, $2, $3, $4, $5, now())
+    transaction
+        .execute(sqlx::query_unchecked!(
+            r#"
+        UPDATE idempotency
+        SET
+            response_status_code = $3,
+            response_headers = $4,
+            response_body = $5
+        WHERE
+            user_id = $1 AND
+            idempotency_key = $2
         "#,
-        user_id,
-        idempotency_key.as_ref(),
-        status_code,
-        headers,
-        body.as_ref()
-    )
-    .execute(pool)
-    .await?;
+            user_id,
+            idempotency_key.as_ref(),
+            status_code,
+            headers,
+            body.as_ref()
+        ))
+        .await?;
+    transaction.commit().await?;
 
     let http_response = response_head.set_body(body).map_into_boxed_body();
     Ok(http_response)
